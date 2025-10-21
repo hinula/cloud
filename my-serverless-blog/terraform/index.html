@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>🎯 Serverless Ödev Projesi Dokümantasyonu</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; max-width: 900px; margin-left: auto; margin-right: auto; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; }
+        .test-box { background: #ecf0f1; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .api-url { font-weight: bold; color: #e74c3c; word-break: break-all; }
+        .question { font-weight: bold; color: #2980b9; margin-top: 20px; }
+        .answer { margin-bottom: 20px; padding-left: 15px; border-left: 3px solid #3498db; }
+    </style>
+</head>
+<body>
+
+    <h1>Serverless Uygulama Geliştirme – “My First Serverless Function+”</h1>
+    <p>Hoş Geldiniz! Bu sayfa, Terraform kullanarak AWS üzerinde kurduğum Serverless ödevi dokümantasyon blogumdur.</p>
+
+    <h2>🚀 Dağıtım (Deployment) Detayları</h2>
+    <p>Bu altyapı, **Terraform** ile AWS **us-east-1** bölgesinde kurulmuştur.</p>
+    <ul>
+        <li>**Serverless API:** AWS Lambda (Node.js) + API Gateway (REST API)</li>
+        <li>**Dokümantasyon/Blog:** AWS S3 Statik Web Sitesi</li>
+        <li>**IAM:** En az ayrıcalık (Least Privilege) prensibine göre ayarlanmıştır.</li>
+    </ul>
+
+    <h2>🧪 Fonksiyon Testi</h2>
+    <p>Lambda fonksiyonu, URL'den `name` parametresini alıp JSON formatında yanıt dönmektedir.</p>
+    
+    <div class="test-box">
+        <p><strong>Temel URL (Terraform Çıktısı):</strong></p>
+        <p class="api-url">
+            <span style="color: #c0392b;">https://k70hselmr2.execute-api.us-east-1.amazonaws.com/prodhello</span>
+        </p>
+        <p><strong>Test Edilmesi Gereken Tam URL Örneği:</strong></p>
+        <code style="display: block; background: #fff; padding: 10px; border-radius: 3px;">
+            <span style="color: green;">https://k70hselmr2.execute-api.us-east-1.amazonaws.com/prod/hello?name=Ali</span>
+        </code>
+    </div>
+
+    <h2>💬 Ödev Sorularının Cevapları</h2>
+
+    <div class="question">1. Neden serverless tercih ettin?</div>
+    <div class="answer">
+        <p>Serverless mimariyi tercih etmemin temel nedenleri **maliyet etkinliği** ve **operasyonel yükün düşürülmesidir**. Sunucu yönetimi (yama, işletim sistemi bakımı) ortadan kalktığı için tamamen koda odaklanabildim. Projenin trafik hacmi düşük olduğu için, sadece fonksiyon çalıştığında ödeme yapmak maliyeti sıfıra yaklaştırmaktadır. Ayrıca, otomatik ölçeklenme yeteneği, gelecekteki trafik artışları için endişe etmemi engeller.</p>
+    </div>
+
+    <div class="question">2. Karşılaştığın en büyük zorluk neydi?</div>
+    <div class="answer">
+        <p>En büyük zorluk, **Terraform state yönetimi ve AWS IAM/API Gateway entegrasyon hataları** oldu. Özellikle:
+        <ol>
+            <li>İlk başta aldığım **"Not Found"** hataları (API Gateway'in Lambda'yı çağırma izninin [Lambda Permission] eksikliğinden kaynaklanıyordu).</li>
+            <li>Farklı API Gateway tipleri (REST vs. HTTP API) arasındaki state çakışmaları.</li>
+            <li>S3'te statik site için dosya yüklerken karşılaştığım **ACL (Access Control List)** hatası (Modern AWS S3 ayarlarıyla uyumsuzluk).</li>
+        </ol>
+        Bu zorluklar, Least Privilege (En Az Ayrıcalık) prensibini uygulamayı öğrenmemi sağladı.</p>
+    </div>
+
+    <div class="question">3. Bu yaklaşım hangi gerçek dünya senaryolarında işe yarar?</div>
+    <div class="answer">
+        <p>Serverless mimari, özellikle **olay tabanlı (event-driven)** ve **istek tabanlı (on-demand)** iş yükleri için mükemmeldir:</p>
+        <ul>
+            <li>**Hafif API/Mikroservisler:** Geleneksel sunucu gerektirmeyen, basit veri okuma/yazma işlemleri (Bu ödevdeki gibi).</li>
+            <li>**Asenkron Veri İşleme:** Bir kullanıcı S3'e resim yüklediğinde, Lambda'nın otomatik tetiklenerek resmi yeniden boyutlandırması veya meta verilerini işlemesi.</li>
+            <li>**Cron İşleri:** Veritabanı temizliği, günlük rapor oluşturma gibi düzenli, zamanlanmış görevler.</li>
+        </ul>
+    </div>
+
+    <hr>
+    <footer>
+        <p>Blog Endpoint (S3): <span style="font-style: italic;">my-serverless-project-blog-b37f6f94.s3-website-us-east-1.amazonaws.com</span></p>
+    </footer>
+</body>
+</html>
