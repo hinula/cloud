@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Kodları çek
+      # 1️⃣ Repo’yu çek
       - name: Checkout Code
         uses: actions/checkout@v3
 
