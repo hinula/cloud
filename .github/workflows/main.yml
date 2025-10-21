@@ -10,17 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Repo’yu checkout et
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2️⃣ Terraform kurulumu
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.0.0
 
-      # 3️⃣ AWS kimlik bilgilerini ayarla
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -28,29 +25,24 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 4️⃣ Lambda ZIP’i oluştur
       - name: Rebuild Lambda ZIP Package
-        working-directory: terraform
+        working-directory: my-serverless-blog
         run: zip -r lambda_function.zip index.js
 
-      # 5️⃣ Terraform Init
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: my-serverless-blog
         run: terraform init
 
-      # 6️⃣ Terraform Plan
       - name: Terraform Plan
-        working-directory: terraform
+        working-directory: my-serverless-blog
         run: terraform plan -out=tfplan -no-color
 
-      # 7️⃣ Terraform Apply
       - name: Terraform Apply
-        working-directory: terraform
+        working-directory: my-serverless-blog
         run: terraform apply -auto-approve tfplan
 
-      # 8️⃣ Endpointleri göster
       - name: Show Outputs
-        working-directory: terraform
+        working-directory: my-serverless-blog
         run: |
           echo "✅ Serverless API: $(terraform output -raw serverless_api_url)"
           echo "✅ Blog Website: $(terraform output -raw blog_website_endpoint)"
