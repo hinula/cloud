@@ -27,6 +27,7 @@ jobs:
           aws-region: eu-central-1
 
       - name: Rebuild Lambda ZIP Package
+        shell: bash
         run: |
           zip -r lambda_function.zip index.js || echo "No index.js found, skipping zip"
 
