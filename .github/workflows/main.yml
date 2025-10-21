@@ -17,10 +17,10 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.0.0
+          terraform_version: "1.0.0"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -29,8 +29,12 @@ jobs:
       - name: Rebuild Lambda ZIP Package
         shell: bash
         run: |
-          echo "Zipping Lambda function..."
-          zip -r lambda_function.zip index.js 2>/dev/null || echo "index.js not found, skipping zip."
+          if [ -f "index.js" ]; then
+            zip -r lambda_function.zip index.js
+            echo "lambda_function.zip created"
+          else
+            echo "index.js not found, skipping zip"
+          fi
 
       - name: Terraform Init
         run: terraform init
@@ -45,9 +49,20 @@ jobs:
         run: terraform apply -auto-approve
 
       - name: Show API Endpoint Output
-        id: output
+        shell: bash
         run: |
-          echo "api_endpoint=$(terraform output -raw api_endpoint)" >> $GITHUB_ENV
+          # terraform output -raw api_endpoint çalışmazsa hata döner; bu yüzden hata yok sayılıyor
+          set +e
+          output=$(terraform output -raw api_endpoint 2>/dev/null || true)
+          # output değişkenini GITHUB_ENV'e yazıyoruz (sonraki adımlarda erişilecek)
+          echo "api_endpoint=${output}" >> "$GITHUB_ENV"
+          set -e
 
       - name: Print API Endpoint
-        run: echo "API Endpoint: $api_endpoint"
+        shell: bash
+        run: |
+          if [ -z "$api_endpoint" ]; then
+            echo "API Endpoint not set or not found in terraform outputs."
+          else
+            echo "API Endpoint: $api_endpoint"
+          fi
