@@ -7,15 +7,12 @@ on:
 
 jobs:
   deploy:
-    name: Terraform + Lambda + API + S3
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Repo Checkout
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # 2️⃣ AWS Credentials
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -23,78 +20,29 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 3️⃣ Terraform Setup
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: "1.0.0"
 
-      # 4️⃣ Check Terraform Directory
-      - name: Check Terraform Directory
-        run: |
-          if [ -d "my-serverless-blog/terraform" ]; then
-            echo "Terraform directory exists"
-          else
-            echo "⚠ Terraform directory not found, skipping Terraform"
-            echo "SKIP_TF=true" >> $GITHUB_ENV
-          fi
-
-      # 5️⃣ Lambda ZIP Build
-      - name: Build Lambda ZIP
-        if: env.SKIP_TF != 'true'
-        shell: bash
-        working-directory: ./my-serverless-blog
-        run: |
-          echo "Current directory: $(pwd)"
-          ls -la lambda
-          if [ -f "lambda/index.js" ]; then
-            zip -r lambda_function.zip lambda/index.js
-            echo "✅ lambda_function.zip created"
-          else
-            echo "❌ lambda/index.js not found!"
-            exit 1
-          fi
-
-      # 6️⃣ Terraform Init
       - name: Terraform Init
-        if: env.SKIP_TF != 'true'
         shell: bash
-        working-directory: ./my-serverless-blog/terraform
+        working-directory: ./terraform
         run: terraform init
 
-      # 7️⃣ Terraform Plan
       - name: Terraform Plan
-        if: env.SKIP_TF != 'true'
         shell: bash
-        working-directory: ./my-serverless-blog/terraform
-        run: terraform plan -no-color
+        working-directory: ./terraform
+        run: terraform plan -out=tfplan -no-color
 
-      # 8️⃣ Terraform Apply
       - name: Terraform Apply
-        if: env.SKIP_TF != 'true'
         shell: bash
-        working-directory: ./my-serverless-blog/terraform
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform apply -auto-approve
+        working-directory: ./terraform
+        run: terraform apply -auto-approve tfplan
 
-      # 9️⃣ Show Outputs
-      - name: Show Terraform Outputs
-        if: env.SKIP_TF != 'true'
+      - name: Show Outputs
         shell: bash
-        working-directory: ./my-serverless-blog/terraform
+        working-directory: ./terraform
         run: |
-          if [ -f "terraform.tfstate" ]; then
-            echo "serverless_api_url=$(terraform output -raw serverless_api_url)" >> $GITHUB_ENV
-            echo "blog_website_endpoint=$(terraform output -raw blog_website_endpoint)" >> $GITHUB_ENV
-          else
-            echo "⚠ Terraform state not found, skipping outputs"
-          fi
-
-      # 🔟 Print Endpoints
-      - name: Print Endpoints
-        shell: bash
-        run: |
-          echo "✅ Serverless API: $serverless_api_url"
-          echo "✅ Blog Website: $blog_website_endpoint"
+          echo "Serverless API: $(terraform output -raw serverless_api_url)"
+          echo "Blog Website: $(terraform output -raw blog_website_endpoint)"
