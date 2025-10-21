@@ -29,7 +29,8 @@ jobs:
       - name: Rebuild Lambda ZIP Package
         shell: bash
         run: |
-          zip -r lambda_function.zip index.js || echo "No index.js found, skipping zip"
+          echo "Zipping Lambda function..."
+          zip -r lambda_function.zip index.js 2>/dev/null || echo "index.js not found, skipping zip."
 
       - name: Terraform Init
         run: terraform init
@@ -38,10 +39,10 @@ jobs:
         run: terraform plan -no-color
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: terraform apply -auto-approve
 
       - name: Show API Endpoint Output
         id: output
