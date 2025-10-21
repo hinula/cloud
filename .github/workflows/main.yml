@@ -1,4 +1,4 @@
-name: Terraform CI/CD | AWS Serverless Deploy
+name: Serverless CI/CD | AWS Terraform
 
 on:
   push:
@@ -6,48 +6,47 @@ on:
       - main
 
 jobs:
-  terraform_apply:
-    name: Terraform Altyapı Dağıtımı (Apply)
+  deploy:
+    name: Terraform + Lambda + API + S3
     runs-on: ubuntu-latest
 
     steps:
       # 1️⃣ Repo Checkout
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Terraform klasörünü kontrol et
-      - name: Check Terraform Directory
-        run: |
-          if [ -d "terraform" ]; then
-            echo "✅ Terraform directory exists"
-          else
-            echo "⚠ Terraform directory not found, skipping Terraform steps"
-            echo "SKIP_TF=true" >> $GITHUB_ENV
-          fi
-
-      # 3️⃣ Terraform Kurulum
-      - name: Setup Terraform
-        if: env.SKIP_TF != 'true'
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: "1.0.0"
-
-      # 4️⃣ AWS Kimlik Bilgileri
+      # 2️⃣ AWS Credentials
       - name: Configure AWS Credentials
-        if: env.SKIP_TF != 'true'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 5️⃣ Lambda ZIP Paketini Oluştur
-      - name: Rebuild Lambda ZIP Package
+      # 3️⃣ Terraform Setup
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.0.0"
+
+      # 4️⃣ Check Terraform Directory
+      - name: Check Terraform Directory
+        run: |
+          if [ -d "terraform" ]; then
+            echo "Terraform directory exists"
+          else
+            echo "⚠ Terraform directory not found, skipping Terraform"
+            echo "SKIP_TF=true" >> $GITHUB_ENV
+          fi
+
+      # 5️⃣ Lambda ZIP Build
+      - name: Build Lambda ZIP
         if: env.SKIP_TF != 'true'
         shell: bash
+        working-directory: ./terraform
         run: |
-          if [ -f "terraform/index.js" ]; then
-            zip -j "terraform/lambda_function.zip" "terraform/index.js"
+          if [ -f "index.js" ]; then
+            zip -r lambda_function.zip index.js
             echo "✅ lambda_function.zip created"
           else
             echo "⚠ index.js not found, skipping zip"
@@ -58,14 +57,14 @@ jobs:
         if: env.SKIP_TF != 'true'
         shell: bash
         working-directory: ./terraform
-        run: terraform init || echo "⚠ Terraform init failed, skipping"
+        run: terraform init
 
       # 7️⃣ Terraform Plan
       - name: Terraform Plan
         if: env.SKIP_TF != 'true'
         shell: bash
         working-directory: ./terraform
-        run: terraform plan -no-color || echo "⚠ Terraform plan failed, skipping"
+        run: terraform plan -no-color
 
       # 8️⃣ Terraform Apply
       - name: Terraform Apply
@@ -75,26 +74,24 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: terraform apply -auto-approve || echo "⚠ Terraform apply failed, skipping"
+        run: terraform apply -auto-approve
 
-      # 9️⃣ Terraform Output
-      - name: Show API Endpoint Output
+      # 9️⃣ Show Outputs
+      - name: Show Terraform Outputs
         if: env.SKIP_TF != 'true'
         shell: bash
         working-directory: ./terraform
         run: |
-          if [ -f "terraform/terraform.tfstate" ]; then
+          if [ -f "terraform.tfstate" ]; then
             echo "serverless_api_url=$(terraform output -raw serverless_api_url)" >> $GITHUB_ENV
+            echo "blog_website_endpoint=$(terraform output -raw blog_website_endpoint)" >> $GITHUB_ENV
           else
-            echo "⚠ Terraform state not found, skipping output"
+            echo "⚠ Terraform state not found, skipping outputs"
           fi
 
-      # 🔟 Print API Endpoint
-      - name: Print API Endpoint
+      # 🔟 Print Endpoints
+      - name: Print Endpoints
         shell: bash
         run: |
-          if [ -z "$serverless_api_url" ]; then
-            echo "⚠ Serverless API Endpoint not available"
-          else
-            echo "✅ Serverless API Endpoint: $serverless_api_url"
-          fi
+          echo "✅ Serverless API: $serverless_api_url"
+          echo "✅ Blog Website: $blog_website_endpoint"
