@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Serverless Ödev Projesi Dokümantasyonu</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f7f6; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { color: #007bff; border-bottom: 3px solid #007bff; padding-bottom: 10px; margin-top: 0; }
+        h2 { color: #343a40; margin-top: 30px; border-left: 5px solid #007bff; padding-left: 10px; }
+        .info-box { background: #e9f7fe; border: 1px solid #cceeff; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .code-block { background: #333; color: #fff; padding: 15px; border-radius: 5px; font-family: Consolas, monospace; overflow-x: auto; margin-top: 10px; }
+        .question { font-weight: bold; color: #28a745; margin-top: 25px; }
+        .answer { margin-left: 15px; padding-left: 10px; border-left: 3px solid #28a745; margin-bottom: 20px; }
+        .warning { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Serverless Uygulama Geliştirme – “My First Serverless Function+”</h1>
+        <p>Bu proje, **Serverless mimari** (AWS Lambda + API Gateway) kullanılarak geliştirilmiş ve **Infrastructure-as-Code** (Terraform) ile AWS us-east-1 bölgesine eksiksiz bir şekilde deploy edilmiştir. Bu sayfa, ödevin dokümantasyon ve teslimat bölümünü içermektedir.</p>
+
+        <h2>💻 Altyapı ve Kaynaklar</h2>
+        <div class="info-box">
+            <ul>
+                <li>**Lambda Runtime:** Node.js 18.x (`index.js`)</li>
+                <li>**Altyapı Aracı:** Terraform (`main.tf`)</li>
+                <li>**IAM İzinleri:** En az ayrıcalık prensibine uygun (Sadece CloudWatch log yazma izni).</li>
+                <li>**Blog Endpoint (S3):** <a href="http://my-serverless-project-blog-b37f6f94.s3-website-us-east-1.amazonaws.com" target="_blank">
+                        my-serverless-project-blog-b37f6f94.s3-website-us-east-1.amazonaws.com
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <h2>🧪 Fonksiyon Testi (HTTP Tetikleyicisi)</h2>
+        <p>Fonksiyon, API Gateway üzerinden `GET /hello?name=...` isteği alarak kişiselleştirilmiş bir JSON yanıtı döner.</p>
+        
+        <div class="test-box">
+            <p><strong>Canlı API Endpoint:</strong></p>
+            <p class="api-url">
+                <span class="warning">https://k70hselmr2.execute-api.us-east-1.amazonaws.com/prod/hello</span>
+            </p>
+            
+            <p><strong>Test Senaryosu (Input / Output):</strong></p>
+            <div class="code-block">
+                $ curl "https://k70hselmr2.execute-api.us-east-1.amazonaws.com/prod/hello?name=Alihan"
+<br>
+                // Beklenen Çıktı:
+<br>
+                {
+                    "message": "Merhaba, bu fonksiyon bulutta (AWS Lambda) çalışıyor ve ödevimi tamamlıyor!",
+                    "challenge": "Göreviniz Başarıyla Tamamlandı!",
+                    "runtime": "Node.js ile JSON çıktı"
+                }
+            </div>
+        </div>
+
+        <h2>💬 Ödev Değerlendirme Sorularının Cevapları</h2>
+
+        <div class="question">1. Neden serverless tercih ettin?</div>
+        <div class="answer">
+            <p>Serverless, normalde böyle bir site yapmak istesem daha uzun süreceğini düşünüyorum ama serverless yapı sayesinde yapılandırmaları doğru yapıldığı sürece gayet hızlı ve kolay oluyor. Tercih nedenlerim:</p>
+            <ul>
+                <li>**Maliyet:** Yalnızca kullanılan süre için ödeme yapıldığı için maliyetler minimaldir. Bir de bir sene ücretiz AWS'de ilk oturuma özel.</li>
+                <li>**Operasyonel Yük:** Sunucu bakımı, yama ve ölçekleme sorunlarıyla uğraşmak zorunda kalmadım. Bu, projeye odaklanmamı sağladı.</li>
+                <li>**Otomatik Ölçeklenme:** Talep arttığında sistemin otomatik olarak kapasite sağlaması, projeyi gelecekteki yüklere karşı dayanıklı hale getirir.</li>
+            </ul>
+        </div>
+
+        <div class="question">2. Karşılaştığın en büyük zorluk neydi?</div>
+        <div class="answer">
+            <p>En zorlayıcı kısım, terraform kısmında kodlarla yapılandırırken sıkıntılar çıktı o biraz zorlaştırdı onun dışında sorun yaşamadım pek.</p>
+            
+        </div>
+
+        <div class="question">3. Bu yaklaşım hangi gerçek dünya senaryolarında işe yarar?</div>
+        <div class="answer">
+            <p>Serverless (Lambda) yaklaşımı, maliyetin düşürülmesi ve ölçeklenebilirliğin kritik olduğu senaryolarda yaygın olarak kullanılır:</p>
+            <ul>
+                <li>**Veri İşleme (Event-Driven):** Bir S3'e dosya yüklendiğinde, Kinesis'e veri aktığında veya veritabanında değişiklik olduğunda tetiklenen asenkron işler.</li>
+                <li>**Web API Backend:** Hafif ve trafik değişkenliği yüksek olan mobil ve web uygulamalarının arka yüz servisleri.</li>
+                <li>**Zamanlanmış Görevler (Cron Jobs):** Düzenli aralıklarla çalışması gereken sistem temizliği, yedekleme veya raporlama işleri.</li>
+            </ul>
+        </div>
+
+        <hr>
+        <footer>
+            <p>Proje Kodu: <a href="https://github.com/hinula/cloud" target="_blank">GitHub Deposu (Kodlar ve README.md)</a></p>
+            <p>Geliştirici: [Adınız Soyadınız] | Tarih: 2025</p>
+        </footer>
+    </div>
+</body>
+
+</html>
