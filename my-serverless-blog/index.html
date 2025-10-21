@@ -51,7 +51,7 @@
                 // Beklenen Çıktı:
 <br>
                 {
-                    "message": "Merhaba Alihan, bu fonksiyon bulutta (AWS Lambda) çalışıyor ve ödevimi tamamlıyor!",
+                    "message": "Merhaba, bu fonksiyon bulutta (AWS Lambda) çalışıyor ve ödevimi tamamlıyor!",
                     "challenge": "Göreviniz Başarıyla Tamamlandı!",
                     "runtime": "Node.js ile JSON çıktı"
                 }
@@ -62,9 +62,9 @@
 
         <div class="question">1. Neden serverless tercih ettin?</div>
         <div class="answer">
-            <p>Serverless, özellikle öğrenci projeleri ve hızlı prototipleme için idealdir. Tercih nedenlerim:</p>
+            <p>Serverless, normalde böyle bir site yapmak istesem daha uzun süreceğini düşünüyorum ama serverless yapı sayesinde yapılandırmaları doğru yapıldığı sürece gayet hızlı ve kolay oluyor. Tercih nedenlerim:</p>
             <ul>
-                <li>**Maliyet:** Yalnızca kullanılan süre için ödeme yapıldığı için maliyetler minimaldir.</li>
+                <li>**Maliyet:** Yalnızca kullanılan süre için ödeme yapıldığı için maliyetler minimaldir. Bir de bir sene ücretiz AWS'de ilk oturuma özel.</li>
                 <li>**Operasyonel Yük:** Sunucu bakımı, yama ve ölçekleme sorunlarıyla uğraşmak zorunda kalmadım. Bu, projeye odaklanmamı sağladı.</li>
                 <li>**Otomatik Ölçeklenme:** Talep arttığında sistemin otomatik olarak kapasite sağlaması, projeyi gelecekteki yüklere karşı dayanıklı hale getirir.</li>
             </ul>
@@ -72,13 +72,8 @@
 
         <div class="question">2. Karşılaştığın en büyük zorluk neydi?</div>
         <div class="answer">
-            <p>En zorlayıcı kısım, **Infrastructure-as-Code (IaC)** ile ilgili hatalardı:</p>
-            <ol>
-                <li>API Gateway'in Lambda'yı çağırması için gereken **IAM izinlerinin (`aws_lambda_permission`)** başlangıçta eksik olması ("Not Found" hatası).</li>
-                <li>Yeni AWS S3 güvenlik politikaları nedeniyle statik site dosyalarını yüklerken çıkan **ACL desteği** hatası.</li>
-                <li>Farklı Terraform ve Provider sürümleri arasındaki state uyumsuzluklarını gidermek.</li>
-            </ol>
-            Bu süreçler, IaC'nin önemini ve bulut servis izinlerinin hassasiyetini kavramamı sağladı.
+            <p>En zorlayıcı kısım, terraform kısmında kodlarla yapılandırırken sıkıntılar çıktı o biraz zorlaştırdı onun dışında sorun yaşamadım pek.</p>
+            
         </div>
 
         <div class="question">3. Bu yaklaşım hangi gerçek dünya senaryolarında işe yarar?</div>
@@ -93,10 +88,11 @@
 
         <hr>
         <footer>
-            <p>Proje Kodu: <a href="[https://github.com/hinula/cloud]" target="_blank">GitHub Deposu (Kodlar ve README.md)</a></p>
+            <p>Proje Kodu: <a href="https://github.com/hinula/cloud" target="_blank">GitHub Deposu (Kodlar ve README.md)</a></p>
             <p>Geliştirici: [Adınız Soyadınız] | Tarih: 2025</p>
         </footer>
     </div>
 </body>
 
 </html>
+
