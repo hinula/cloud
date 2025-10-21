@@ -11,21 +11,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Repo Kodlarını Çek
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # 2️⃣ Terraform Kurulum
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: "1.0.0"
 
+      # 3️⃣ AWS Kimlik Bilgileri
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
+          aws-region: us-east-1
 
+      # 4️⃣ Lambda ZIP Paketini Oluştur
       - name: Rebuild Lambda ZIP Package
         shell: bash
         run: |
@@ -36,33 +40,37 @@ jobs:
             echo "index.js not found, skipping zip"
           fi
 
+      # 5️⃣ Terraform Init
       - name: Terraform Init
         run: terraform init
+        working-directory: ./
 
+      # 6️⃣ Terraform Plan
       - name: Terraform Plan
         run: terraform plan -no-color
+        working-directory: ./
 
+      # 7️⃣ Terraform Apply
       - name: Terraform Apply
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform apply -auto-approve
+        working-directory: ./
 
+      # 8️⃣ Terraform Output: API Endpoint
       - name: Show API Endpoint Output
         shell: bash
         run: |
-          # terraform output -raw api_endpoint çalışmazsa hata döner; bu yüzden hata yok sayılıyor
-          set +e
-          output=$(terraform output -raw api_endpoint 2>/dev/null || true)
-          # output değişkenini GITHUB_ENV'e yazıyoruz (sonraki adımlarda erişilecek)
-          echo "api_endpoint=${output}" >> "$GITHUB_ENV"
-          set -e
+          echo "serverless_api_url=$(terraform output -raw serverless_api_url)" >> $GITHUB_ENV
+        working-directory: ./
 
+      # 9️⃣ Print API Endpoint
       - name: Print API Endpoint
         shell: bash
         run: |
-          if [ -z "$api_endpoint" ]; then
-            echo "API Endpoint not set or not found in terraform outputs."
+          if [ -z "$serverless_api_url" ]; then
+            echo "API Endpoint not found."
           else
-            echo "API Endpoint: $api_endpoint"
+            echo " Serverless API Endpoint: $serverless_api_url"
           fi
