@@ -15,13 +15,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2️⃣ Terraform Kurulum
+      # 2️⃣ Repo Dosyalarını Kontrol Et
+      - name: List repo files
+        run: ls -R
+
+      # 3️⃣ Terraform Kurulum
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: "1.0.0"
 
-      # 3️⃣ AWS Kimlik Bilgileri
+      # 4️⃣ AWS Kimlik Bilgileri
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -29,9 +33,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 4️⃣ Lambda ZIP Paketini Oluştur
+      # 5️⃣ Lambda ZIP Paketini Oluştur
       - name: Rebuild Lambda ZIP Package
         shell: bash
+        working-directory: ./terraform  # <-- .tf dosyalarının olduğu klasör
         run: |
           if [ -f "index.js" ]; then
             zip -r lambda_function.zip index.js
@@ -40,37 +45,37 @@ jobs:
             echo "index.js not found, skipping zip"
           fi
 
-      # 5️⃣ Terraform Init
+      # 6️⃣ Terraform Init
       - name: Terraform Init
+        working-directory: ./terraform
         run: terraform init
-        working-directory: ./
 
-      # 6️⃣ Terraform Plan
+      # 7️⃣ Terraform Plan
       - name: Terraform Plan
+        working-directory: ./terraform
         run: terraform plan -no-color
-        working-directory: ./
 
-      # 7️⃣ Terraform Apply
+      # 8️⃣ Terraform Apply
       - name: Terraform Apply
+        working-directory: ./terraform
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: terraform apply -auto-approve
-        working-directory: ./
 
-      # 8️⃣ Terraform Output: API Endpoint
+      # 9️⃣ Terraform Output: API Endpoint
       - name: Show API Endpoint Output
         shell: bash
+        working-directory: ./terraform
         run: |
           echo "serverless_api_url=$(terraform output -raw serverless_api_url)" >> $GITHUB_ENV
-        working-directory: ./
 
-      # 9️⃣ Print API Endpoint
+      # 🔟 Print API Endpoint
       - name: Print API Endpoint
         shell: bash
         run: |
           if [ -z "$serverless_api_url" ]; then
             echo "API Endpoint not found."
           else
-            echo " Serverless API Endpoint: $serverless_api_url"
+            echo "✅ Serverless API Endpoint: $serverless_api_url"
           fi
