@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repo
         uses: actions/checkout@v3
 
       - name: Configure AWS Credentials
@@ -25,24 +25,25 @@ jobs:
         with:
           terraform_version: "1.0.0"
 
+      - name: Build Lambda ZIP
+        working-directory: ./my-serverless-blog/terraform
+        run: |
+          zip -r lambda_function.zip index.js
+
       - name: Terraform Init
-        shell: bash
-        working-directory: ./terraform
+        working-directory: ./my-serverless-blog/terraform
         run: terraform init
 
       - name: Terraform Plan
-        shell: bash
-        working-directory: ./terraform
-        run: terraform plan -out=tfplan -no-color
+        working-directory: ./my-serverless-blog/terraform
+        run: terraform plan -no-color
 
       - name: Terraform Apply
-        shell: bash
-        working-directory: ./terraform
-        run: terraform apply -auto-approve tfplan
+        working-directory: ./my-serverless-blog/terraform
+        run: terraform apply -auto-approve
 
       - name: Show Outputs
-        shell: bash
-        working-directory: ./terraform
+        working-directory: ./my-serverless-blog/terraform
         run: |
           echo "Serverless API: $(terraform output -raw serverless_api_url)"
           echo "Blog Website: $(terraform output -raw blog_website_endpoint)"
