@@ -1,0 +1,65 @@
+# .github/workflows/main.yml
+name: Terraform CI/CD | AWS Serverless Deploy
+
+# main dalına yapılan her push işleminde bu workflow'u tetikle
+on:
+  push:
+    branches:
+      - main 
+
+# İş Tanımı
+jobs:
+  terraform_apply:
+    name: "Terraform Altyapı Dağıtımı (Apply)"
+    runs-on: ubuntu-latest # Çalışma ortamı olarak Ubuntu sunucuyu kullan
+
+    steps:
+    - name: Checkout Code
+      # Depodaki kodları Runner (GitHub sunucusu) üzerine indir
+      uses: actions/checkout@v3
+
+    # 1. Terraform Kurulumu
+    - name: Setup Terraform
+      # HashiCorp'un resmi aksiyonu ile Terraform'u kur
+      uses: hashicorp/setup-terraform@v2
+      with:
+        # Hangi Terraform sürümünü kullanacağınızı belirtin
+        terraform_version: 1.0.0 
+
+    # 2. AWS Kimlik Bilgilerini Yapılandırma
+    - name: Configure AWS Credentials
+      # AWS'ye kimlik doğrulama için GitHub Secrets kullan
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        # GitHub Secrets'ta tanımladığınız anahtarlar
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        # main.tf dosyanızdaki ile aynı bölge olmalı
+        aws-region: eu-central-1 
+
+    # 3. Lambda Kodunu Hazırlama
+    # Terraform'un kodu güncelleyebilmesi için ZIP dosyasını yeniden oluştur
+    - name: Rebuild Lambda ZIP Package
+      run: |
+        # Lambda kod dosyanızın adı 'index.js' ise onu zip'le
+        zip -r lambda_function.zip index.js
+      
+    # 4. Terraform Başlatma (Init)
+    # S3 Remote Backend'i ve modülleri başlatır
+    - name: Terraform Init
+      run: terraform init
+      
+    # 5. Terraform Planı Kontrol Etme
+    # Değişiklikleri terminalde gösterir (apply yapmaz)
+    - name: Terraform Plan
+      run: terraform plan -no-color
+
+    # 6. Terraform Uygulama (Altyapı Dağıtımı)
+    # Planlanan değişiklikleri onay almadan uygular (CI/CD için gereklidir)
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+      
+    # 7. Dağıtılan API Endpoint'ini GitHub Logs'ta Gösterme
+    # Terraform'un output'unu terminale yazdırır
+    - name: Show API Endpoint Output
+      run: terraform output api_endpoint
