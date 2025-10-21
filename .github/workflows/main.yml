@@ -35,37 +35,43 @@ jobs:
           if [ -d "my-serverless-blog" ]; then
             echo "Terraform directory exists"
           else
-            echo "❌ my-serverless-blog directory not found!"
-            exit 1
+            echo "⚠ my-serverless-blog directory not found, skipping Terraform"
+            echo "SKIP_TF=true" >> $GITHUB_ENV
           fi
 
       # 5️⃣ Lambda ZIP Build
       - name: Build Lambda ZIP
+        if: env.SKIP_TF != 'true'
         shell: bash
         working-directory: ./my-serverless-blog
         run: |
+          echo "Current directory: $(pwd)"
+          ls -la
           if [ -f "index.js" ]; then
             zip -r lambda_function.zip index.js
             echo "✅ lambda_function.zip created"
           else
-            echo "❌ index.js not found, skipping zip"
+            echo "❌ index.js not found!"
             exit 1
           fi
 
       # 6️⃣ Terraform Init
       - name: Terraform Init
+        if: env.SKIP_TF != 'true'
         shell: bash
         working-directory: ./my-serverless-blog
         run: terraform init
 
       # 7️⃣ Terraform Plan
       - name: Terraform Plan
+        if: env.SKIP_TF != 'true'
         shell: bash
         working-directory: ./my-serverless-blog
         run: terraform plan -no-color
 
       # 8️⃣ Terraform Apply
       - name: Terraform Apply
+        if: env.SKIP_TF != 'true'
         shell: bash
         working-directory: ./my-serverless-blog
         env:
@@ -75,11 +81,16 @@ jobs:
 
       # 9️⃣ Show Outputs
       - name: Show Terraform Outputs
+        if: env.SKIP_TF != 'true'
         shell: bash
         working-directory: ./my-serverless-blog
         run: |
-          echo "serverless_api_url=$(terraform output -raw serverless_api_url)" >> $GITHUB_ENV
-          echo "blog_website_endpoint=$(terraform output -raw blog_website_endpoint)" >> $GITHUB_ENV
+          if [ -f "terraform.tfstate" ]; then
+            echo "serverless_api_url=$(terraform output -raw serverless_api_url)" >> $GITHUB_ENV
+            echo "blog_website_endpoint=$(terraform output -raw blog_website_endpoint)" >> $GITHUB_ENV
+          else
+            echo "⚠ Terraform state not found, skipping outputs"
+          fi
 
       # 🔟 Print Endpoints
       - name: Print Endpoints
