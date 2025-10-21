@@ -32,10 +32,10 @@ jobs:
       # 4️⃣ Check Terraform Directory
       - name: Check Terraform Directory
         run: |
-          if [ -d "my-serverless-blog" ]; then
+          if [ -d "my-serverless-blog/terraform" ]; then
             echo "Terraform directory exists"
           else
-            echo "⚠ my-serverless-blog directory not found, skipping Terraform"
+            echo "⚠ Terraform directory not found, skipping Terraform"
             echo "SKIP_TF=true" >> $GITHUB_ENV
           fi
 
@@ -46,12 +46,12 @@ jobs:
         working-directory: ./my-serverless-blog
         run: |
           echo "Current directory: $(pwd)"
-          ls -la
-          if [ -f "index.js" ]; then
-            zip -r lambda_function.zip index.js
+          ls -la lambda
+          if [ -f "lambda/index.js" ]; then
+            zip -r lambda_function.zip lambda/index.js
             echo "✅ lambda_function.zip created"
           else
-            echo "❌ index.js not found!"
+            echo "❌ lambda/index.js not found!"
             exit 1
           fi
 
@@ -59,21 +59,21 @@ jobs:
       - name: Terraform Init
         if: env.SKIP_TF != 'true'
         shell: bash
-        working-directory: ./my-serverless-blog
+        working-directory: ./my-serverless-blog/terraform
         run: terraform init
 
       # 7️⃣ Terraform Plan
       - name: Terraform Plan
         if: env.SKIP_TF != 'true'
         shell: bash
-        working-directory: ./my-serverless-blog
+        working-directory: ./my-serverless-blog/terraform
         run: terraform plan -no-color
 
       # 8️⃣ Terraform Apply
       - name: Terraform Apply
         if: env.SKIP_TF != 'true'
         shell: bash
-        working-directory: ./my-serverless-blog
+        working-directory: ./my-serverless-blog/terraform
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -83,7 +83,7 @@ jobs:
       - name: Show Terraform Outputs
         if: env.SKIP_TF != 'true'
         shell: bash
-        working-directory: ./my-serverless-blog
+        working-directory: ./my-serverless-blog/terraform
         run: |
           if [ -f "terraform.tfstate" ]; then
             echo "serverless_api_url=$(terraform output -raw serverless_api_url)" >> $GITHUB_ENV
