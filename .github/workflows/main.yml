@@ -11,50 +11,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Depoyu indir
-    - name: Checkout Code
-      uses: actions/checkout@v3
+      # 1. Depoyu indir
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    # 2. Terraform Kurulumu
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.0.0 
+      # 2. Terraform Kurulumu
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.0 
 
-    # 3. AWS Kimlik Bilgilerini Yapılandır
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4   # 🔹 v1 yerine v4 kullan
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-central-1 
+      # 3. AWS Kimlik Bilgilerini Yapılandır
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1 
 
-    # 4. Lambda Kodunu Yeniden Paketle
-    - name: Rebuild Lambda ZIP Package
-      run: |
-        zip -r lambda_function.zip index.js || echo "No index.js found, skipping zip"
+      # 4. Lambda Kodunu Yeniden Paketle
+      - name: Rebuild Lambda ZIP Package
+        run: |
+          zip -r lambda_function.zip index.js || echo "No index.js found, skipping zip"
 
-    # 5. Terraform Init
-    - name: Terraform Init
-      run: terraform init
+      # 5. Terraform Init
+      - name: Terraform Init
+        run: terraform init
 
-    # 6. Terraform Plan
-    - name: Terraform Plan
-      run: terraform plan -no-color
+      # 6. Terraform Plan
+      - name: Terraform Plan
+        run: terraform plan -no-color
 
-    # 7. Terraform Apply
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # 7. Terraform Apply
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-    # 8. Terraform Output (API Endpoint Göster)
-    - name: Show API Endpoint Output
-      id: output
-      run: |
-        echo "api_endpoint=$(terraform output -raw api_endpoint)" >> $GITHUB_OUTPUT
+      # 8. Terraform Output (API Endpoint Göster)
+      - name: Show API Endpoint Output
+        id: output
+        run: |
+          echo "api_endpoint=$(terraform output -raw api_endpoint)" >> $GITHUB_ENV
 
-    # 9. Logda API endpoint'i yazdır
-    - name: Print API Endpoint
-      run: echo "✅ API Endpoint: ${{ steps.output.outputs.api_endpoint }}"
+      # 9. Logda API endpoint'i yazdır
+      - name: Print API Endpoint
+        run: echo "✅ API Endpoint: $api_endpoint"
