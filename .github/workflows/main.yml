@@ -10,14 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Kodları çek
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # 2️⃣ Terraform kurulumu
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.0.0
 
+      # 3️⃣ AWS kimlik bilgilerini ayarla
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -25,22 +28,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      # 4️⃣ Lambda ZIP paketini oluştur
       - name: Rebuild Lambda ZIP Package
         working-directory: my-serverless-blog
-        run: zip -r lambda_function.zip index.js
+        run: zip -r lambda_function_payload.zip . -i index.js
 
+      # 5️⃣ Terraform init
       - name: Terraform Init
         working-directory: my-serverless-blog
         run: terraform init
 
+      # 6️⃣ Terraform plan
       - name: Terraform Plan
         working-directory: my-serverless-blog
         run: terraform plan -out=tfplan -no-color
 
+      # 7️⃣ Terraform apply
       - name: Terraform Apply
         working-directory: my-serverless-blog
         run: terraform apply -auto-approve tfplan
 
+      # 8️⃣ Outputs’u göster
       - name: Show Outputs
         working-directory: my-serverless-blog
         run: |
