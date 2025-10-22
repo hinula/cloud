@@ -59,7 +59,7 @@ Proje iki ana bileşenden oluşuyor:
 ---
 
 ## 🧭 Kurulum ve Çalıştırma
- " aws configure " yaparak acsses key and secret keylerini aws'inizde düzgün yapılandırılımış bir IAM kullanıcısı yaparak accsess keylerini alabilirsiniz.
+ " aws configure " yaparak Access key ID ve Secret access key aws'inizde düzgün yapılandırılımış bir IAM kullanıcısı yaparak Access key ID, Secret access key alabilirsiniz.
  Dosyayı klonladıktan sonra:
  cd terraform
  terraform init
@@ -72,3 +72,12 @@ Proje iki ana bileşenden oluşuyor:
 ```bash
 git clone https://github.com/kullanici/serverless-blog-project.git
 cd serverless-blog-project
+````
+
+### Deneme
+my-serverless-blog dosyasının içinde video var izleyebilirsiniz.
+CI/CD : 
+<img width="842" height="361" alt="Ekran görüntüsü 2025-10-22 001119" src="https://github.com/user-attachments/assets/7ead404d-622a-444c-9105-c1841cebbbea" />
+
+
+
