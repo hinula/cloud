@@ -76,7 +76,7 @@ cd serverless-blog-project
 
 ### Deneme
 my-serverless-blog dosyasının içinde video var izleyebilirsiniz.
-CI/CD : 
+- CI/CD kısmında da olup olmadığını actions kısmından baktım ben sizde eknsiniz bu şekilde gerçekleştirebilirsiniz.(githubda setting kısmından keyleri yapılandırmayı unutmayın!!!) : 
 <img width="842" height="361" alt="Ekran görüntüsü 2025-10-22 001119" src="https://github.com/user-attachments/assets/7ead404d-622a-444c-9105-c1841cebbbea" />
 
 
